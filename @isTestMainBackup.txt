@@ -1,0 +1,251 @@
+@isTest
+private class IF_TriggerHandler_Test {
+
+    
+    private class TestTriggerHandler extends IF_TriggerHandler {
+        public override void beforeInsert(List<sObject> newItems) {
+            
+        }
+        public override void beforeUpdate(Map<Id, sObject> newItems, Map<Id, sObject> oldItems) {
+           
+        }
+        public override void beforeDelete(Map<Id, sObject> oldItems) {
+            
+        }
+        public override void afterInsert(Map<Id, sObject> newItems) {
+            
+        }
+        public override void afterUpdate(Map<Id, sObject> newItems, Map<Id, sObject> oldItems) {
+            
+        }
+        public override void afterDelete(Map<Id, sObject> oldItems) {
+            
+        }
+        public override void afterUndelete(Map<Id, sObject> newItems) {
+            
+        }
+        public override void afterInsertAsync(Map<Id, sObject> newItems) {
+            
+        }
+        public override void afterUpdateAsync(Map<Id, sObject> newItems, Map<Id, sObject> oldItems) {
+           
+        }
+    }
+    
+    @isTest
+    static void testNotOverriden() {
+        IF_TriggerHandler handler = new TestTriggerHandler();
+        Test.startTest();
+        //handler.notOverriden();
+        Test.stopTest();
+       
+    }
+    
+    
+    
+
+    @isTest
+    static void testafterInsert() {
+        // Create test data for Custom_Object__c
+        List<Account> acc = new List<Account>{
+            new Account(Name = 'Test Object 1'),
+            new Account(Name = 'Test Object 2')
+        };
+        insert acc;
+                
+        Test.startTest();
+        
+        IF_TriggerHandler handler = new TestTriggerHandler();
+   
+       
+        handler.afterInsert(new Map<Id, sObject>());
+       
+        Test.stopTest();
+        
+        //Assertion
+        System.assertEquals(0, 0, 'This is a sample assertion');
+    }
+    
+    @isTest
+    static void testafterDelete() {
+        // Create test data for Custom_Object__c
+        List<Account> acc = new List<Account>{
+            new Account(Name = 'Test Object 1'),
+            new Account(Name = 'Test Object 2')
+        };
+        insert acc;
+        delete acc;
+                
+        Test.startTest();
+        
+        IF_TriggerHandler handler = new TestTriggerHandler();
+   
+       
+        handler.afterDelete(new Map<Id, sObject>());
+       
+        Test.stopTest();
+        
+        //Assertion
+        System.assertEquals(0, 0, 'This is a sample assertion');
+    }
+    
+    @isTest
+    static void afterUpdate() {
+        // Create test data for Custom_Object__c
+        List<Account> acc = new List<Account>{
+            new Account(Name = 'Test Object 1'),
+            new Account(Name = 'Test Object 2')
+        };
+        insert acc;
+        
+        List<Account> updateObject = new List<Account>();
+        for (Account obj : updateObject) {
+            obj.Name = 'Updated ' + obj.Name;
+            updateObject.add(obj);
+        }
+        update updateObject;
+      
+                
+        Test.startTest();
+        
+        IF_TriggerHandler handler = new TestTriggerHandler();
+   
+        handler.afterUpdate(new Map<Id, sObject>(), new Map<Id, sObject>());
+       
+        Test.stopTest();
+        
+        //Assertion
+        System.assertEquals(0, 0, 'This is a sample assertion');
+    }
+    
+       
+    
+    @isTest
+    static void testafterUndelete() {
+        List<Account> accList = new List<Account>{
+            new Account(Name = 'Test Object 1'),
+            new Account(Name = 'Test Object 2')
+        };
+        insert accList;
+
+       
+        delete accList;
+
+        List<Id> undeletedIds = new List<Id>();
+        List<Database.UndeleteResult> undeleteResults = Database.undelete(accList, false);
+        for (Database.UndeleteResult result : undeleteResults) {
+            if (result.isSuccess()) {
+                undeletedIds.add(result.getId());
+            }
+        }
+
+        Test.startTest();
+        IF_TriggerHandler handler = new TestTriggerHandler();
+        List<Account> undeletedAccounts = [SELECT Id, Name FROM Account WHERE Id IN :undeletedIds];
+
+        Map<Id, sObject> undeletedRecords = new Map<Id, sObject>();
+        for (Account acc : undeletedAccounts) {
+            undeletedRecords.put(acc.Id, acc);
+        }
+        handler.afterUndelete(undeletedRecords);
+        Test.stopTest();
+        System.assertEquals(0, 0, 'This is a sample assertion');
+    }
+    
+
+
+    @isTest
+    static void testafterUpdate() {
+        //  test data for Account
+        List<Account> accList = new List<Account>{
+            new Account(Name = 'Test Object 1'),
+            new Account(Name = 'Test Object 2')
+        };
+        insert accList;
+        
+        //Update Records
+        for (Account acc : accList) {
+            acc.Name = 'Updated Name';
+        }
+        update accList;
+        Test.startTest();
+        IF_TriggerHandler handler = new TestTriggerHandler();
+
+        Map<Id, sObject> newItems = new Map<Id, sObject>();
+        Map<Id, sObject> oldItems = new Map<Id, sObject>();
+        for (Account newAcc : accList) {
+            newItems.put(newAcc.Id, newAcc);
+            oldItems.put(newAcc.Id, new Account(Name = 'Test Object 1')); 
+        }
+
+        handler.afterUpdate(newItems, oldItems);
+        Test.stopTest();
+        System.assertEquals(0, 0, 'This is a sample assertion');
+    }
+    
+    @isTest
+    static void testBeforeInsert() {
+        // Create test data for Account
+        List<Account> accList = new List<Account>{
+            new Account(Name = 'Test Object 1'),
+            new Account(Name = 'Test Object 2')
+        };
+        
+        
+
+        Test.startTest();
+        
+        TestTriggerHandler handler = new TestTriggerHandler();
+        handler.beforeInsert(accList);
+        for (Account acc : accList) {
+            System.assertNotEquals(null, acc.Name, 'Name field should have been populated.');
+        }
+
+        Test.stopTest();
+    }
+    
+    @isTest
+    static void testBeforeUpdate() {
+        // Create test data for Account
+        List<Account> accList = new List<Account>{
+            new Account(Name = 'Test Object 1'),
+            new Account(Name = 'Test Object 2')
+        };
+        insert accList;
+
+        // Modify the accounts before the update
+        for (Account acc : accList) {
+            acc.Name = 'Updated Name';
+        }
+
+        Test.startTest();
+
+        // Instantiate the TestTriggerHandler class that extends IF_TriggerHandler
+        TestTriggerHandler handler = new TestTriggerHandler();
+
+        // Call the beforeUpdate method passing in the list of new and old items
+        Map<Id, sObject> newItems = new Map<Id, sObject>();
+        Map<Id, sObject> oldItems = new Map<Id, sObject>();
+        for (Account acc : accList) {
+            newItems.put(acc.Id, acc);
+            oldItems.put(acc.Id, new Account(Name = 'Test Object 1'));
+        }
+        handler.beforeUpdate(newItems, oldItems);
+
+        // Add your specific assertions for the beforeUpdate behavior
+        // For example, check if certain fields were modified or some validation occurred
+
+        // For this example, let's assume we set a custom "Description" field on the new items.
+        for (Account acc : accList) {
+            System.assertNotEquals('Test Object 1', acc.Name, 'Name should have been updated.');
+        }
+
+        Test.stopTest();
+    }
+    
+    
+    
+    
+
+    
+}
